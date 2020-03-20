@@ -92,7 +92,43 @@ class LawBot(commands.Cog):
         em.add_field(name="New Cash Value",value=f"¥{info['cash']}",inline=False)
         em.add_field(name="New Bank Balance",value=f"¥{info['balance']}",inline=False)
         await ctx.send(embed=em)
-        
+
+    @commands.command()
+    async def withdraw(self,ctx,amount=None):
+        '''Deposits an amount of cash to the bank balance.'''
+        em = discord.Embed()
+        if len(data.search(User.id == ctx.author.id)) != 1:
+            em.title = "**Error**"
+            em.description = "This user does not have a bank account registered."
+            em.color = 0xff0000
+            return await ctx.send(embed=em)
+        if amount == None:
+            return await ctx.send("```.withdraw amount\n\nWithdraws an amount of cash from the bank balance.```")
+        try:
+            amount = int(amount)
+        except:
+            em.title = "**Error**"
+            em.description = "That is not a valid amount."
+            em.color = 0xff0000
+            return await ctx.send(embed=em)       
+
+        info = data.search(User.id == ctx.author.id)[0]
+        if int(amount) > info["balance"]
+            em.title = "**Error**"
+            em.description = "You do not have that much balance in your bank account."
+            em.color = 0xff0000
+            return await ctx.send(embed=em)
+
+        em = discord.Embed()
+        em.color = 0xff0000
+        em.title = "Cash Withdrawn"
+        data.update({"cash":info['cash']+int(amount),"balance":info['balance']-int(amount)},User.id == ctx.author.id)
+        info = data.search(User.id == ctx.author.id)[0]
+        em.add_field(name="Amount Withdrawn",value=f"¥{int(amount)}",inline=False)
+        em.add_field(name="New Cash Value",value=f"¥{info['cash']}",inline=False)
+        em.add_field(name="New Bank Balance",value=f"¥{info['balance']}",inline=False)
+        await ctx.send(embed=em)
+       
     @commands.command()
     async def work(self,ctx):
         """The user works to earn some cash."""
