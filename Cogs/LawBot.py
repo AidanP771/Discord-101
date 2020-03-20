@@ -285,7 +285,7 @@ class LawBot(commands.Cog):
         em = discord.Embed()
         multiplier = 10
         em.title = "Crash"
-        em.set_footer(icon_url=ctx.author.avatar_url_as(static_format="png"),text=f"Started by {ctx.author}")
+        em.set_footer(icon_url=ctx.author.avatar_url_as(static_format="png"),text=f"Started by {ctx.author} | Do .stop to stop")
         em.add_field(name="Multiplier",value=f"{multiplier/10}x")
         em.add_field(name="Profit",value=f"¥0")
         em.color = 0xffff00
@@ -330,7 +330,7 @@ class LawBot(commands.Cog):
                     em = discord.Embed()
                     em.title = "Crashing"
                     em.color = 0xffff00
-                    em.set_footer(icon_url=ctx.author.avatar_url_as(static_format="png"),text=f"Started by {ctx.author}")
+                    em.set_footer(icon_url=ctx.author.avatar_url_as(static_format="png"),text=f"Started by {ctx.author} | Do .stop to stop")
                     em.add_field(name="Multiplier",value=f"{multiplier/10}x")
                     em.add_field(name="Profit",value=f"¥{profit}")
                     await me.edit(embed=em)
