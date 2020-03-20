@@ -7,6 +7,7 @@ bot = commands.Bot(command_prefix=".")
 @bot.event
 async def on_ready():
     print('Logged in as '+bot.user.name)
+    await bot.change_presence(activity=discord.Activity(name="em' earn!",type=3))
     for extension in startup_extensions:
         try:
             bot.load_extension(extension)
