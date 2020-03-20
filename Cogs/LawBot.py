@@ -262,6 +262,7 @@ class LawBot(commands.Cog):
 
     @commands.command()
     async def crash(self,ctx,bet=None):
+        '''Multiply your bet by an increasing multiplier. However, the multiplier may crash.'''
         em = discord.Embed()
         if len(data.search(User.id == ctx.author.id)) != 1:
             em.title = "**Error**"
@@ -277,7 +278,7 @@ class LawBot(commands.Cog):
                 return await ctx.send(embed=em)
         except:
             em.title = "**Error**"
-            em.description = "That is not a valid bet amount."
+            em.description = "That is not a valid bet amount.\n\nPlease follow this syntax: `.crash betAmount`"
             em.color = 0xff0000    
             return await ctx.send(embed=em)
         
