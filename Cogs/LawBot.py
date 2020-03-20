@@ -309,9 +309,9 @@ class LawBot(commands.Cog):
                 data.update({"cash":info['cash']+profit},User.id == ctx.author.id)
                 break
             except Exception as e:
-                if multiplier < 20:
+                if multiplier < 18: #upto 1.6x, there is 20% chance of crash
                     fail = random.choice([True,False,False,False,False])
-                else:
+                else:# 50/50 chances
                     fail = random.choice([True,True,False,False])
                 if fail:
                     em = discord.Embed()
@@ -335,6 +335,5 @@ class LawBot(commands.Cog):
                     em.add_field(name="Profit",value=f"¥{profit}")
                     await me.edit(embed=em)
 
-    
 def setup(bot):
     bot.add_cog(LawBot(bot))
