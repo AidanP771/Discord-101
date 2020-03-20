@@ -28,7 +28,11 @@ class LawBot(commands.Cog):
     async def register(self,ctx):
         """Opens up a bank account for the user."""
         if len(data.search(User.id == ctx.author.id)) != 0:
-            return await ctx.send("You already have a bank account registered.")
+            em = discord.Embed()
+            em.title="Error"
+            em.description = "You already have a bank account registered."
+            em.color = 0xff0000
+            return await ctx.send(embed=em)
         data.insert({"id":ctx.author.id,"cash":500,"balance":0,"lastJobTime":None,"lastCrimeTime":None})
         em = discord.Embed()
         em.title = "**New Registration**"
@@ -63,7 +67,9 @@ class LawBot(commands.Cog):
             return await ctx.send(embed=em)
         info = data.search(User.id == ctx.author.id)[0]
         if info["lastJobTime"] != None:
-            if ((arrow.utcnow() - arrow.get(info["lastJobTime"])).seconds)/3600 < 24:
+            lastUse = arrow.get(info["lastJobTime"])
+            nextAvailUse = lastUse.shift(hours=24)
+            if nextAvailUse.timestamp > arrow.utcnow().timestamp:
                 em.title = "Error"
                 future = arrow.get(info['lastJobTime']).shift(hours=24)
                 nextIn = future.humanize(arrow.utcnow(), only_distance=True, granularity=["hour","minute"])
@@ -76,6 +82,8 @@ class LawBot(commands.Cog):
         em.description = f"You worked hard and earned **¥{earnings}!**"
         em.color = 0x00ff00
         await ctx.send(embed=em)
+
+    
 
 def setup(bot):
     bot.add_cog(LawBot(bot))
