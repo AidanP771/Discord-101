@@ -1,4 +1,5 @@
 from discord.ext import commands
+import discord
 
 startup_extensions = ["Cogs.LawBot"]
 
@@ -50,5 +51,4 @@ async def add(ctx,left : int, right : int):
 
 bot.help_command=commands.DefaultHelpCommand(command_attrs={"hidden": True,"dm_help":True,"sort_commands":False})
 if __name__ == "__main__":
-    #bot.run(input("Insert Token Please: "))
-    bot.run("NjkwMDEzMjU4MDMxNDMxNzQ0.XnQFCg.y2slNZkYDS-SvdvzxBauWNRUklU")
+    bot.run(input("Insert Token Please: "))

@@ -141,10 +141,10 @@ class LawBot(commands.Cog):
         info = data.search(User.id == ctx.author.id)[0]
         if info["lastJobTime"] != None:
             lastUse = arrow.get(info["lastJobTime"])
-            nextAvailUse = lastUse.shift(hours=24)
+            nextAvailUse = lastUse.shift(hours=2)
             if nextAvailUse.timestamp > arrow.utcnow().timestamp:
                 em.title = "**Error**"
-                future = arrow.get(info['lastJobTime']).shift(hours=24)
+                future = arrow.get(info['lastJobTime']).shift(hours=2)
                 nextIn = future.humanize(arrow.utcnow(), only_distance=True, granularity=["hour","minute"])
                 em.description = f"You cannot use this command for another **{nextIn}**"
                 em.color = 0xff0000
@@ -156,7 +156,7 @@ class LawBot(commands.Cog):
         em.color = 0x00ff00
         await ctx.send(embed=em)
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def rob(self,ctx):
         em = discord.Embed()
         if len(data.search(User.id == ctx.author.id)) != 1:
@@ -171,7 +171,7 @@ class LawBot(commands.Cog):
     async def roulette(self,ctx,numCol=None,bet=None):
         '''Spins a roulette.'''
         if numCol == None or bet == None:
-            await ctx.send("```.roulette color/number bet\n\nSpins a roulette. The amount in the cash account is changed based on the outcome.```")
+            return await ctx.send("```.roulette color/number bet\n\nSpins a roulette. The amount in the cash account is changed based on the outcome.```")
         em = discord.Embed()
         if len(data.search(User.id == ctx.author.id)) != 1:
             em.title = "**Error**"
@@ -260,5 +260,80 @@ class LawBot(commands.Cog):
                 await m.edit(embed=em)
                 data.update({"cash":info['cash']-int(bet)},User.id == ctx.author.id)
 
+    @commands.command()
+    async def crash(self,ctx,bet=None):
+        em = discord.Embed()
+        if len(data.search(User.id == ctx.author.id)) != 1:
+            em.title = "**Error**"
+            em.description = "This user does not have a bank account registered."
+            em.color = 0xff0000
+            return await ctx.send(embed=em)
+        info = data.search(User.id == ctx.author.id)[0]
+        try:
+            if int(bet) > info['cash']:
+                em.title = "**Error**"
+                em.description = "You do not have enough cash for that bet."
+                em.color = 0xff0000
+                return await ctx.send(embed=em)
+        except:
+            em.title = "**Error**"
+            em.description = "That is not a valid bet amount."
+            em.color = 0xff0000    
+            return await ctx.send(embed=em)
+        
+        em = discord.Embed()
+        multiplier = 10
+        em.title = "Crash"
+        em.set_footer(icon_url=ctx.author.avatar_url_as(static_format="png"),text=f"Started by {ctx.author}")
+        em.add_field(name="Multiplier",value=f"{multiplier/10}x")
+        em.add_field(name="Profit",value=f"¥0")
+        em.color = 0xffff00
+        me = await ctx.send(embed=em)
+
+        def check(m):
+            return m.content == '.stop' and m.channel == ctx.message.channel and m.author == ctx.author
+
+        while True:
+            try:
+                msg = await self.bot.wait_for('message', check=check,timeout=2.0)
+                profit = (int(bet)*(multiplier-10)) // 10
+                em = discord.Embed()
+                em.title = "Crash Stopped"
+                em.color = 0x00ff00
+                em.set_footer(icon_url=ctx.author.avatar_url_as(static_format="png"),text=f"Started by {ctx.author}")
+                em.add_field(name="Multiplier",value=f"{multiplier/10}x")
+                em.add_field(name="Profit",value=f"¥{profit}")
+                em.add_field(name="Cash",value=f"You have ¥{info['cash']+profit}",inline=False)
+                await me.edit(embed=em)
+                data.update({"cash":info['cash']+profit},User.id == ctx.author.id)
+                break
+            except Exception as e:
+                if multiplier < 20:
+                    fail = random.choice([True,False,False,False,False])
+                else:
+                    fail = random.choice([True,True,False,False])
+                if fail:
+                    em = discord.Embed()
+                    em.title = "Crashed"
+                    em.color = 0xff0000
+                    em.set_footer(icon_url=ctx.author.avatar_url_as(static_format="png"),text=f"Started by {ctx.author}")
+                    em.add_field(name="Multiplier",value=f"{multiplier/10}x")
+                    em.add_field(name="Loss",value=f"¥{int(bet)}")
+                    em.add_field(name="Cash",value=f"You have ¥{info['cash']-int(bet)}",inline=False)
+                    await me.edit(embed=em)
+                    data.update({"cash":info['cash']-int(bet)},User.id == ctx.author.id)
+                    break
+                else:
+                    multiplier+=2
+                    profit = (int(bet)*(multiplier-10)) // 10
+                    em = discord.Embed()
+                    em.title = "Crashing"
+                    em.color = 0xffff00
+                    em.set_footer(icon_url=ctx.author.avatar_url_as(static_format="png"),text=f"Started by {ctx.author}")
+                    em.add_field(name="Multiplier",value=f"{multiplier/10}x")
+                    em.add_field(name="Profit",value=f"¥{profit}")
+                    await me.edit(embed=em)
+
+    
 def setup(bot):
     bot.add_cog(LawBot(bot))
