@@ -58,6 +58,42 @@ class LawBot(commands.Cog):
         await ctx.send(embed=em)
 
     @commands.command()
+    async def deposit(self,ctx,amount=None):
+        '''Deposits an amount of cash to the bank balance.'''
+        em = discord.Embed()
+        if len(data.search(User.id == ctx.author.id)) != 1:
+            em.title = "**Error**"
+            em.description = "This user does not have a bank account registered."
+            em.color = 0xff0000
+            return await ctx.send(embed=em)
+        if amount == None:
+            return await ctx.send("```.deposit amount\n\nDeposits an amount of cash to the bank balance.```")
+        try:
+            amount = int(amount)
+        except:
+            em.title = "**Error**"
+            em.description = "That is not a valid amount."
+            em.color = 0xff0000
+            return await ctx.send(embed=em)       
+
+        info = data.search(User.id == ctx.author.id)[0]
+        if int(amount) > info["cash"]
+            em.title = "**Error**"
+            em.description = "You do not have that much cash."
+            em.color = 0xff0000
+            return await ctx.send(embed=em)
+
+        em = discord.Embed()
+        em.color = 0xff0000
+        em.title = "Cash Deposited"
+        data.update({"cash":info['cash']-int(amount),"balance":info['balance']+int(amount)},User.id == ctx.author.id)
+        info = data.search(User.id == ctx.author.id)[0]
+        em.add_field(name="Amount Deposited",value=f"¥{int(amount)}",inline=False)
+        em.add_field(name="New Cash Value",value=f"¥{info['cash']}",inline=False)
+        em.add_field(name="New Bank Balance",value=f"¥{info['balance']}",inline=False)
+        await ctx.send(embed=em)
+        
+    @commands.command()
     async def work(self,ctx):
         """The user works to earn some cash."""
         em = discord.Embed()
@@ -85,7 +121,10 @@ class LawBot(commands.Cog):
         await ctx.send(embed=em)
 
     @commands.command()
-    async def roulette(self,ctx,numCol,bet):
+    async def roulette(self,ctx,numCol=None,bet=None):
+        '''Spins a roulette.'''
+        if numCol == None or bet == None:
+            await ctx.send("```.roulette color/number bet\n\nSpins a roulette. The amount in the cash account is changed based on the outcome.```")
         em = discord.Embed()
         if len(data.search(User.id == ctx.author.id)) != 1:
             em.title = "**Error**"
@@ -99,7 +138,8 @@ class LawBot(commands.Cog):
             if pos not in range(1,61):
                 em.title = "**Error**"
                 em.description = "That is not a valid color/number."
-                em.color = 0xff0000            
+                em.color = 0xff0000
+                return await ctx.send(embed=em)       
         except:
             color = True
             if numCol.lower() == "black":
@@ -140,7 +180,7 @@ class LawBot(commands.Cog):
                 em.color = 0x00ff00
                 em.add_field(name="**Your Bet**",value=numCol.capitalize(),inline=False)
                 em.add_field(name="**The Spin**",value=spin,inline=False)
-                em.add_field(name="**Payout**",value=int(bet)*2)
+                em.add_field(name="**Profit**",value=f"¥{int(bet)}")
                 await m.edit(embed=em)
                 data.update({"cash":info['cash']+int(bet)},User.id == ctx.author.id)
             else:
@@ -149,7 +189,7 @@ class LawBot(commands.Cog):
                 em.color = 0xff0000
                 em.add_field(name="**Your Bet**",value=numCol.capitalize(),inline=False)
                 em.add_field(name="**The Spin**",value=spin,inline=False)
-                em.add_field(name="**Loss**",value=int(bet))
+                em.add_field(name="**Loss**",value=f"¥{int(bet)}")
                 await m.edit(embed=em)
                 data.update({"cash":info['cash']-int(bet)},User.id == ctx.author.id)
         else:
@@ -160,7 +200,7 @@ class LawBot(commands.Cog):
                 em.color = 0x00ff00
                 em.add_field(name="**Your Bet**",value=numCol.capitalize(),inline=False)
                 em.add_field(name="**The Spin**",value=winner,inline=False)
-                em.add_field(name="**Payout**",value=int(bet)*60)
+                em.add_field(name="**Profit**",value=f"¥{int(bet)*59}")
                 await m.edit(embed=em)
                 data.update({"cash":info['cash']+(int(bet)*59)},User.id == ctx.author.id)
             else:
@@ -169,7 +209,7 @@ class LawBot(commands.Cog):
                 em.color = 0xff0000
                 em.add_field(name="**Your Bet**",value=numCol.capitalize(),inline=False)
                 em.add_field(name="**The Spin**",value=winner,inline=False)
-                em.add_field(name="**Loss**",value=int(bet))
+                em.add_field(name="**Loss**",value=f"¥{int(bet)}")
                 await m.edit(embed=em)
                 data.update({"cash":info['cash']-int(bet)},User.id == ctx.author.id)
 
