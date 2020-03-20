@@ -77,14 +77,14 @@ class LawBot(commands.Cog):
             return await ctx.send(embed=em)       
 
         info = data.search(User.id == ctx.author.id)[0]
-        if int(amount) > info["cash"]
+        if int(amount) > info["cash"]:
             em.title = "**Error**"
             em.description = "You do not have that much cash."
             em.color = 0xff0000
             return await ctx.send(embed=em)
 
         em = discord.Embed()
-        em.color = 0xff0000
+        em.color = 0x00ff00
         em.title = "Cash Deposited"
         data.update({"cash":info['cash']-int(amount),"balance":info['balance']+int(amount)},User.id == ctx.author.id)
         info = data.search(User.id == ctx.author.id)[0]
@@ -113,10 +113,10 @@ class LawBot(commands.Cog):
             return await ctx.send(embed=em)       
 
         info = data.search(User.id == ctx.author.id)[0]
-        if int(amount) > info["balance"]
+        if int(amount) > info["balance"]:
             em.title = "**Error**"
             em.description = "You do not have that much balance in your bank account."
-            em.color = 0xff0000
+            em.color = 0x00ff00
             return await ctx.send(embed=em)
 
         em = discord.Embed()
@@ -154,6 +154,17 @@ class LawBot(commands.Cog):
         em.title = "Money Earned!"
         em.description = f"You worked hard and earned **¥{earnings}!**"
         em.color = 0x00ff00
+        await ctx.send(embed=em)
+
+    @commands.command()
+    async def rob(self,ctx):
+        em = discord.Embed()
+        if len(data.search(User.id == ctx.author.id)) != 1:
+            em.title = "**Error**"
+            em.description = "This user does not have a bank account registered."
+            em.color = 0xff0000
+            return await ctx.send(embed=em)
+        info = data.search(User.id == ctx.author.id)[0]
         await ctx.send(embed=em)
 
     @commands.command()
