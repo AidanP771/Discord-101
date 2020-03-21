@@ -497,12 +497,17 @@ class LawBot(commands.Cog):
             else:
                 streak = 0
                 em = discord.Embed()
-                em.set_footer(icon_url=ctx.author.avatar_url_as(static_format="png"),text=f"Requested by {ctx.author} | Trivia Question from opentdb.com")
+                em.set_footer(icon_url=ctx.author.avatar_url_as(static_format="png"),text=f"Requested by {ctx.author} | Trivia Questions from opentdb.com")
                 em.set_author(name=q["category"]+" Trivia | "+q["difficulty"])
                 em.title = html.unescape(q["question"])
                 em.color = 0xff0000
                 em.description = f"Boo! The correct answer is {html.unescape(q['correct_answer'])}"
                 await questionEm.edit(embed=em)
+
+        em = discord.Embed()
+        em.title = "You finished this trivia! Start a new one by running the trivia command."
+        em.set_footer(icon_url=ctx.author.avatar_url_as(static_format="png"),text=f"Finished by {ctx.author} | Trivia Questions from opentdb.com")
+        await ctx.send(em)
         
 def setup(bot):
     bot.add_cog(LawBot(bot))
