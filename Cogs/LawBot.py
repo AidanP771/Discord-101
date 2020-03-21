@@ -422,10 +422,10 @@ class LawBot(commands.Cog):
             em.color = 0xff0000    
             return await ctx.send(embed=em)
         luck = random.randint(0,100)
-        if luck > 90:
-            rate = random.randint(0,1000)
+        if luck > 95:
+            rate = random.randint(0,500)
         else:
-            rate = random.randint(0,200)
+            rate = random.randint(25,150)
 
         returns = int(cash)*(rate/100)
         em = discord.Embed()
