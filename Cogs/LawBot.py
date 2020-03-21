@@ -6,6 +6,8 @@ from tinydb import TinyDB, Query
 import random
 import arrow
 import asyncio
+import requests
+import html
 
 data = TinyDB("data/LawData.json")
 User = Query()
@@ -445,6 +447,62 @@ class LawBot(commands.Cog):
             em.add_field(name="Cash",value=f"You have ¥{info['cash']-(int(cash) - returns)}",inline=False)
             data.update({"cash":int(info['cash']-(int(cash) - returns))},User.id == ctx.author.id)
             await ctx.send(embed=em)
+
+    @commands.command()
+    async def trivia(self,ctx):
+        '''Starts a trivia of 50 questions. The user may earn cash for right answers.'''
+        em = discord.Embed()
+        if len(data.search(User.id == ctx.author.id)) != 1:
+            em.title = "**Error**"
+            em.description = "This user does not have a bank account registered."
+            em.color = 0xff0000
+            return await ctx.send(embed=em)
+
+        questions = requests.get("https://opentdb.com/api.php?amount=50").json()['results']
+
+        def check(m):
+            return m.channel == ctx.message.channel and m.author == ctx.author
+        streak = 0
+        for q in questions:
+            em = discord.Embed()
+            em.set_footer(icon_url=ctx.author.avatar_url_as(static_format="png"),text=f"Requested by {ctx.author} | Trivia Question from opentdb.com")
+            em.set_author(name=q["category"]+" Trivia | "+q["difficulty"].capitalize())
+            em.title = html.unescape(q["question"])
+            options = q["incorrect_answers"]
+            options.append(q["correct_answer"])
+            random.shuffle(options)
+            em.add_field(name="Options:",value="\n".join([html.unescape(x) for x in options]),inline=True)
+            em.color = 0xffff00
+            questionEm = await ctx.send(embed=em)
+            try:
+                userResponse = await self.bot.wait_for('message', check=check,timeout=30.0)
+            except:
+                em = discord.Embed()
+                em.color = 0xff0000
+                em.title = "**Error**"
+                em.description = "You did not answer in 30 seconds. The trivia has been timed out."
+                return await ctx.send(embed=em)
+            if userResponse.content.lower() == q["correct_answer"].lower():
+                streak+=1
+                em = discord.Embed()
+                em.set_footer(icon_url=ctx.author.avatar_url_as(static_format="png"),text=f"Requested by {ctx.author} | Trivia Question from opentdb.com")
+                em.set_author(name=q["category"]+" Trivia | "+q["difficulty"])
+                em.title = html.unescape(q["question"])
+                em.color = 0x00ff00
+                em.description = "That is the correct answer!\nYou have a correct answer streak of **{}**".format(streak)
+                em.description += "\n\nYou earned ¥{} for answering this question right!\nYour earnings increase as your streak increases.".format(10*streak)
+                info = data.search(User.id == ctx.author.id)[0]
+                data.update({"cash":info["cash"]+(10*streak)},User.id == ctx.author.id)
+                await questionEm.edit(embed=em)
+            else:
+                streak = 0
+                em = discord.Embed()
+                em.set_footer(icon_url=ctx.author.avatar_url_as(static_format="png"),text=f"Requested by {ctx.author} | Trivia Question from opentdb.com")
+                em.set_author(name=q["category"]+" Trivia | "+q["difficulty"])
+                em.title = html.unescape(q["question"])
+                em.color = 0xff0000
+                em.description = f"Boo! The correct answer is {html.unescape(q['correct_answer'])}"
+                await questionEm.edit(embed=em)
         
 def setup(bot):
     bot.add_cog(LawBot(bot))
