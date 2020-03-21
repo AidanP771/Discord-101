@@ -359,9 +359,9 @@ class LawBot(commands.Cog):
 
     @commands.command()
     async def invest(self,ctx,cash=None):
+        """Invests an amount of cash into a company."""
         em = discord.Embed()
         if len(data.search(User.id == ctx.author.id)) != 1:
-            """Invests an amount of cash into a company."""
             em.title = "**Error**"
             em.description = "This user does not have a bank account registered."
             em.color = 0xff0000
