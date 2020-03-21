@@ -24,6 +24,7 @@ class LawBot(commands.Cog):
             return await ctx.send(embed=em)
         info = data.search(User.id == ctx.author.id)[0]
         await ctx.send(embed=em)'''
+
     @commands.command()
     async def leaderboard(self,ctx):
         """Displays a leaderboard for this server's economy."""
@@ -356,5 +357,53 @@ class LawBot(commands.Cog):
                     em.add_field(name="Profit",value=f"¥{profit}")
                     await me.edit(embed=em)
 
+    @commands.command()
+    async def invest(self,ctx,cash=None):
+        em = discord.Embed()
+        if len(data.search(User.id == ctx.author.id)) != 1:
+            """Invests an amount of cash into a company."""
+            em.title = "**Error**"
+            em.description = "This user does not have a bank account registered."
+            em.color = 0xff0000
+            return await ctx.send(embed=em)
+        if cash == None:
+            return await ctx.send("```.invest cashAmount\n\nInvests an amount of cash into a company. The payout is random at best.```")
+        info = data.search(User.id == ctx.author.id)[0]
+        try:
+            if int(cash) > info['cash']:
+                em.title = "**Error**"
+                em.description = "You do not have enough cash for that bet."
+                em.color = 0xff0000
+                return await ctx.send(embed=em)
+        except:
+            em.title = "**Error**"
+            em.description = "That is not a valid cash amount."
+            em.color = 0xff0000    
+            return await ctx.send(embed=em)
+        luck = random.randint(0,100)
+        if luck > 90:
+            rate = random.randint(0,1000)
+        else:
+            rate = random.randint(0,200)
+
+        returns = int(cash)*(rate/100)
+        em = discord.Embed()
+        em.set_footer(icon_url=ctx.author.avatar_url_as(static_format="png"),text=f"Invested by {ctx.author}")
+        em.title = "Investment Results"
+        if rate > 100:
+            em.color = 0x00ff00
+            em.add_field(name="Investment Value",value=f"{rate}%",inline=False)
+            em.add_field(name="Profit",value=f"{round(returns-int(cash),2)}",inline=False)
+            em.add_field(name="Cash",value=f"You have ¥{info['cash']+returns-int(cash)}",inline=False)
+            data.update({"cash":int(info['cash']+returns-int(cash))},User.id == ctx.author.id)
+            await ctx.send(embed=em)
+        else:
+            em.color = 0xff0000
+            em.add_field(name="Investment Value",value=f"{rate}%",inline=False)
+            em.add_field(name="Loss",value=f"{round(int(cash)-returns,2)}",inline=False)
+            em.add_field(name="Cash",value=f"You have ¥{info['cash']-(int(cash) - returns)}",inline=False)
+            data.update({"cash":int(info['cash']-(int(cash) - returns))},User.id == ctx.author.id)
+            await ctx.send(embed=em)
+        
 def setup(bot):
     bot.add_cog(LawBot(bot))
