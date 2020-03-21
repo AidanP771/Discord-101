@@ -459,7 +459,7 @@ class LawBot(commands.Cog):
             return await ctx.send(embed=em)
 
         questions = requests.get("https://opentdb.com/api.php?amount=50").json()['results']
-
+        await ctx.send("**50 Questions coming right up!**")
         def check(m):
             return m.channel == ctx.message.channel and m.author == ctx.author
         streak = 0
