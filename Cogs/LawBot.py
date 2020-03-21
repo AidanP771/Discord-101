@@ -490,9 +490,9 @@ class LawBot(commands.Cog):
                 em.title = html.unescape(q["question"])
                 em.color = 0x00ff00
                 em.description = "That is the correct answer!\nYou have a correct answer streak of **{}**".format(streak)
-                em.description += "\n\nYou earned ¥{} for answering this question right!\nYour earnings increase as your streak increases.".format(10*streak)
+                em.description += "\n\nYou earned ¥{} for answering this question right!\nYour earnings increase as your streak increases.".format(100*streak)
                 info = data.search(User.id == ctx.author.id)[0]
-                data.update({"cash":info["cash"]+(10*streak)},User.id == ctx.author.id)
+                data.update({"cash":info["cash"]+(100*streak)},User.id == ctx.author.id)
                 await questionEm.edit(embed=em)
             else:
                 streak = 0
