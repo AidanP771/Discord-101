@@ -178,16 +178,57 @@ class LawBot(commands.Cog):
         em.color = 0x00ff00
         await ctx.send(embed=em)
 
-    @commands.command(hidden=True)
+    @commands.command()
     async def rob(self,ctx):
+        """Rob someone's cash."""
         em = discord.Embed()
         if len(data.search(User.id == ctx.author.id)) != 1:
             em.title = "**Error**"
             em.description = "This user does not have a bank account registered."
             em.color = 0xff0000
             return await ctx.send(embed=em)
+        if len(ctx.message.mentions) != 1:
+            em.title = "**Error**"
+            em.description = "You need to @mention someone to use this command."
+            em.color = 0xff0000
+            return await ctx.send(embed=em)
+        target = ctx.message.mentions[0]
+        if len(data.search(User.id == target.id)) != 1:
+            em.title = "**Error**"
+            em.description = "This target does not have a bank account registered."
+            em.color = 0xff0000
+            return await ctx.send(embed=em)
+
         info = data.search(User.id == ctx.author.id)[0]
-        await ctx.send(embed=em)
+        infoTarget = data.search(User.id == target.id)[0]
+        
+        if info["lastCrimeTime"] != None:
+            lastUse = arrow.get(info["lastCrimeTime"])
+            nextAvailUse = lastUse.shift(hours=6)
+            if nextAvailUse.timestamp > arrow.utcnow().timestamp:
+                em.title = "**Error**"
+                future = arrow.get(info['lastCrimeTime']).shift(hours=6)
+                nextIn = future.humanize(arrow.utcnow(), only_distance=True, granularity=["hour","minute"])
+                em.description = f"You cannot use this command for another **{nextIn}**"
+                em.color = 0xff0000
+                return await ctx.send(embed=em)
+
+        successRate = 40
+        if random.randint(0,100) <= successRate:
+            robAmount = random.randint(1,infoTarget["cash"])
+            em = discord.Embed()
+            em.color = 0x00ff00
+            em.description = f"You robbed **{target.display_name}** for **¥{robAmount}**"
+            await ctx.send(embed=em)
+            data.update({"cash":infoTarget["cash"]-robAmount},User.id == target.id)
+            data.update({"cash":info["cash"]+robAmount,"lastCrimeTime":arrow.utcnow().timestamp},User.id == ctx.author.id)
+        else:
+            fine = random.randint(1,info["cash"])
+            em = discord.Embed()
+            em.color = 0xff0000
+            em.description = f"You got caught robbing **{target.display_name}** and got fined **¥{fine}**"
+            await ctx.send(embed=em)
+            data.update({"cash":info["cash"]-fine,"lastCrimeTime":arrow.utcnow().timestamp},User.id == ctx.author.id)
 
     @commands.command()
     async def roulette(self,ctx,numCol=None,bet=None):
@@ -372,7 +413,7 @@ class LawBot(commands.Cog):
         try:
             if int(cash) > info['cash']:
                 em.title = "**Error**"
-                em.description = "You do not have enough cash for that bet."
+                em.description = "You do not have enough cash for that investment."
                 em.color = 0xff0000
                 return await ctx.send(embed=em)
         except:
