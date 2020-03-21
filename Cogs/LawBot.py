@@ -24,6 +24,27 @@ class LawBot(commands.Cog):
             return await ctx.send(embed=em)
         info = data.search(User.id == ctx.author.id)[0]
         await ctx.send(embed=em)'''
+    @commands.command()
+    async def leaderboard(self,ctx):
+        """Displays a leaderboard for this server's economy."""
+        em = discord.Embed()
+        em.title = "Leaderboard"
+        em.description = ""
+        users = []
+        for item in data:
+            worth = item["cash"] + item["balance"]
+            try:
+                users.append((worth,f"{ctx.guild.get_member(item['id']).display_name}"))
+            except Exception as e:
+                pass
+        users.sort(reverse=True)
+        n = 1
+        em.color = 0x000099
+        for top in users[:5]:
+            em.description += f"**Rank #{n}:** {top[1]} - *Worth ¥{top[0]}*\n"
+            n+=1
+        em.set_footer(icon_url=ctx.author.avatar_url_as(static_format="png"),text=f"Requested by {ctx.author}")
+        await ctx.send(embed=em)
 
     @commands.command()
     async def register(self,ctx):
@@ -34,10 +55,10 @@ class LawBot(commands.Cog):
             em.description = "You already have a bank account registered."
             em.color = 0xff0000
             return await ctx.send(embed=em)
-        data.insert({"id":ctx.author.id,"cash":500,"balance":0,"lastJobTime":None,"lastCrimeTime":None})
+        data.insert({"id":ctx.author.id,"cash":15000,"balance":0,"lastJobTime":None,"lastCrimeTime":None})
         em = discord.Embed()
         em.title = "**New Registration**"
-        em.description = f"<@{ctx.author.id}> registered successfully! Your starting balance is **¥500**"
+        em.description = f"<@{ctx.author.id}> registered successfully! Your starting balance is **¥15000**"
         em.color = 0xffff00
         await ctx.send(embed=em)
 
@@ -149,7 +170,7 @@ class LawBot(commands.Cog):
                 em.description = f"You cannot use this command for another **{nextIn}**"
                 em.color = 0xff0000
                 return await ctx.send(embed=em)
-        earnings = random.randint(20,1500)
+        earnings = random.randint(500,7500)
         data.update({"cash":info['cash']+earnings,"lastJobTime":arrow.utcnow().timestamp},User.id == ctx.author.id)
         em.title = "Money Earned!"
         em.description = f"You worked hard and earned **¥{earnings}!**"
