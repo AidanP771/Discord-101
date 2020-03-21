@@ -283,9 +283,9 @@ class LawBot(commands.Cog):
         if color:
             spin = random.randint(1,60)
             if spin % 2 == 0:
-                winner = "red"
-            else:
                 winner = "black"
+            else:
+                winner = "red"
             if winner == numCol.lower():
                 em = discord.Embed()
                 em.title = "**You Win**"
@@ -508,6 +508,6 @@ class LawBot(commands.Cog):
         em.title = "You finished this trivia! Start a new one by running the trivia command."
         em.set_footer(icon_url=ctx.author.avatar_url_as(static_format="png"),text=f"Finished by {ctx.author} | Trivia Questions from opentdb.com")
         await ctx.send(em)
-        
+
 def setup(bot):
     bot.add_cog(LawBot(bot))
