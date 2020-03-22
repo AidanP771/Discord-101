@@ -486,7 +486,7 @@ class LawBot(commands.Cog):
                 streak+=1
                 em = discord.Embed()
                 em.set_footer(icon_url=ctx.author.avatar_url_as(static_format="png"),text=f"Requested by {ctx.author} | Trivia Question from opentdb.com")
-                em.set_author(name=q["category"]+" Trivia | "+q["difficulty"])
+                em.set_author(name=q["category"]+" Trivia | "+q["difficulty"].capitalize())
                 em.title = html.unescape(q["question"])
                 em.color = 0x00ff00
                 em.description = "That is the correct answer!\nYou have a correct answer streak of **{}**".format(streak)
@@ -498,7 +498,7 @@ class LawBot(commands.Cog):
                 streak = 0
                 em = discord.Embed()
                 em.set_footer(icon_url=ctx.author.avatar_url_as(static_format="png"),text=f"Requested by {ctx.author} | Trivia Questions from opentdb.com")
-                em.set_author(name=q["category"]+" Trivia | "+q["difficulty"])
+                em.set_author(name=q["category"]+" Trivia | "+q["difficulty"].capitalize())
                 em.title = html.unescape(q["question"])
                 em.color = 0xff0000
                 em.description = f"Boo! The correct answer is {html.unescape(q['correct_answer'])}"
