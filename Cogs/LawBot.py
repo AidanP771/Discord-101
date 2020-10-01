@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands,tasks
+from discord.ext.commands.cooldowns import BucketType
 
 from tinydb import TinyDB, Query
 
@@ -325,6 +326,7 @@ class LawBot(commands.Cog):
                 await m.edit(embed=em)
                 data.update({"cash":info['cash']-int(bet)},User.id == ctx.author.id)
 
+    @commands.cooldown(1,60,BucketType.user)
     @commands.command()
     async def crash(self,ctx,bet=None):
         '''Multiply your bet by an increasing multiplier. However, the multiplier may crash.'''
